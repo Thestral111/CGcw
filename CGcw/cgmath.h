@@ -301,7 +301,33 @@ public:
 	}
 
 
+	Matrix LookAt(const Vec3& eye, const Vec3& target, const Vec3& up) {
+		// Step 1: Calculate the forward (z-axis) vector
+		Vec3 z = (eye - target).normalize();
 
+		// Step 2: Calculate the right (x-axis) vector
+		Vec3 x = (((Vec3) up).Cross(z)).normalize();
+
+		// Step 3: Calculate the true up (y-axis) vector
+		Vec3 y = z.Cross(x);
+
+		// Step 4: Create the rotation matrix
+		Matrix rotation;
+		rotation.m[0] = x.x; rotation.m[4] = x.y; rotation.m[8] = x.z;  rotation.m[12] = 0.0f;
+		rotation.m[1] = y.x; rotation.m[5] = y.y; rotation.m[9] = y.z;  rotation.m[13] = 0.0f;
+		rotation.m[2] = z.x; rotation.m[6] = z.y; rotation.m[10] = z.z; rotation.m[14] = 0.0f;
+		rotation.m[3] = 0.0f; rotation.m[7] = 0.0f; rotation.m[11] = 0.0f; rotation.m[15] = 1.0f;
+
+		// Step 5: Create the translation matrix
+		Matrix translation;
+		translation.identity();
+		translation.m[12] = -eye.x;
+		translation.m[13] = -eye.y;
+		translation.m[14] = -eye.z;
+
+		// Step 6: Combine rotation and translation matrices
+		return rotation.mul(translation);
+	}
 	
 
 

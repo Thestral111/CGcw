@@ -3,10 +3,10 @@
 #include "Device.h"
 
 
-DXCore core;
+DXCore core1;
 
 void getDXCore(DXCore& _core) {
-	core = _core;
+	core1 = _core;
 }
 
 struct STATIC_VERTEX
@@ -45,14 +45,14 @@ public:
 
 	}
 
-	void init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices)
+	void init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& core)
 	{
 		init(&vertices[0], sizeof(STATIC_VERTEX), vertices.size(), &indices[0], indices.size(), core);
 	}
 
-	void draw() {
+	void draw(DXCore& core) {
 		UINT offsets = 0;
-		DXCore core;
+		//DXCore core;
 		core.devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		core.devicecontext->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
 		core.devicecontext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -88,11 +88,13 @@ public:
 		std::vector<unsigned int> indices;
 		indices.push_back(2); indices.push_back(1); indices.push_back(0);
 		indices.push_back(1); indices.push_back(2); indices.push_back(3);
-		geometry.init(vertices, indices);
+		geometry.init(vertices, indices, core);
 
 	}
 
-	
+	void draw(DXCore& core) {
+		geometry.draw(core);
+	}
 
 
 };
