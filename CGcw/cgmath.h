@@ -329,7 +329,30 @@ public:
 		return rotation.mul(translation);
 	}
 	
+	Matrix Perspective(float fov, float aspect, float zNear, float zFar) {
+		Matrix projection;
+		float tanHalfFOV = tanf(fov / 2.0f);
 
+		projection.identity();
+
+		// First column
+		projection.m[0] = 1.0f / (aspect * tanHalfFOV);
+
+		// Second column
+		projection.m[5] = 1.0f / tanHalfFOV;
+
+		// Third column
+		//projection.m[10] = -(zFar + zNear) / (zFar - zNear);
+		projection.m[10] = -zFar / (zFar - zNear);
+		projection.m[11] = -1.0f;
+
+		// Fourth column
+		//projection.m[14] = -(2.0f * zFar * zNear) / (zFar - zNear);
+		projection.m[14] = -(zFar * zNear) / (zFar - zNear);
+		projection.m[15] = 0.0f;
+
+		return projection;
+	}
 
 
 };

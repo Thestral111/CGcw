@@ -134,6 +134,7 @@
     <ClInclude Include="Adapter.h" />
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="Device.h" />
+    <ClInclude Include="GamesEngineeringBase.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ShaderReflection.h" />

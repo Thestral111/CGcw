@@ -149,7 +149,7 @@ public:
         };
         core.device->CreateInputLayout(layoutDesc, 4, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
         ConstantBufferReflection reflection;
-        reflection.build(&core, compiledVertexShader, psConstantBuffers, textureBindPointsPS, ShaderStage::VertexShader);
+        reflection.build(&core, compiledVertexShader, vsConstantBuffers, textureBindPointsVS, ShaderStage::VertexShader);
 
     }
 
