@@ -301,32 +301,36 @@ public:
 	}
 
 
-	Matrix LookAt(const Vec3& eye, const Vec3& target, const Vec3& up) {
-		// Step 1: Calculate the forward (z-axis) vector
-		Vec3 z = (eye - target).normalize();
+	
 
-		// Step 2: Calculate the right (x-axis) vector
-		Vec3 x = (((Vec3) up).Cross(z)).normalize();
+	Matrix lookAt(Vec3& from, Vec3& to, Vec3& up) {
+		Vec3 dir = (from - to).normalize();
+		Vec3 right = up.Cross(dir).normalize();
+		Vec3 upNew = dir.Cross(right);
+		Matrix result;
 
-		// Step 3: Calculate the true up (y-axis) vector
-		Vec3 y = z.Cross(x);
+		result.m[0] = right.x;
+		result.m[1] = right.y;
+		result.m[2] = right.z;
 
-		// Step 4: Create the rotation matrix
-		Matrix rotation;
-		rotation.m[0] = x.x; rotation.m[4] = x.y; rotation.m[8] = x.z;  rotation.m[12] = 0.0f;
-		rotation.m[1] = y.x; rotation.m[5] = y.y; rotation.m[9] = y.z;  rotation.m[13] = 0.0f;
-		rotation.m[2] = z.x; rotation.m[6] = z.y; rotation.m[10] = z.z; rotation.m[14] = 0.0f;
-		rotation.m[3] = 0.0f; rotation.m[7] = 0.0f; rotation.m[11] = 0.0f; rotation.m[15] = 1.0f;
+		result.m[4] = upNew.x;
+		result.m[5] = upNew.y;
+		result.m[6] = upNew.z;
 
-		// Step 5: Create the translation matrix
-		Matrix translation;
-		translation.identity();
-		translation.m[12] = -eye.x;
-		translation.m[13] = -eye.y;
-		translation.m[14] = -eye.z;
+		result.m[8] = dir.x;
+		result.m[9] = dir.y;
+		result.m[10] = dir.z;
 
-		// Step 6: Combine rotation and translation matrices
-		return rotation.mul(translation);
+		result.m[3] = -from.Dot(right);
+		result.m[7] = -from.Dot(upNew);
+		result.m[11] = -from.Dot(dir);
+
+		result.m[12] = 0.f;
+		result.m[13] = 0.f;
+		result.m[14] = 0.f;
+		result.m[15] = 1.f;
+
+		return result;
 	}
 	
 	Matrix Perspective(float fov, float aspect, float zNear, float zFar) {
@@ -344,16 +348,19 @@ public:
 		// Third column
 		//projection.m[10] = -(zFar + zNear) / (zFar - zNear);
 		projection.m[10] = -zFar / (zFar - zNear);
-		projection.m[11] = -1.0f;
+		projection.m[11] = -(zFar * zNear) / (zFar - zNear);
 
 		// Fourth column
 		//projection.m[14] = -(2.0f * zFar * zNear) / (zFar - zNear);
-		projection.m[14] = -(zFar * zNear) / (zFar - zNear);
+		projection.m[14] = -1.0f;
 		projection.m[15] = 0.0f;
 
 		return projection;
 	}
 
+	
+
+	
 
 };
 
