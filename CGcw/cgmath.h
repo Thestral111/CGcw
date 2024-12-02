@@ -235,6 +235,7 @@ public:
 		mat.m[0] = v.x;
 		mat.m[5] = v.y;
 		mat.m[10] = v.z;
+		return mat;
 	}
 
 	static Matrix rotateX(float theta) {

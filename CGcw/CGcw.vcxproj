@@ -135,6 +135,7 @@
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="GamesEngineeringBase.h" />
+    <ClInclude Include="GEMLoader.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ShaderReflection.h" />
@@ -145,6 +146,10 @@
     <Text Include="3D_vertexShader.txt" />
     <Text Include="pixelShader.txt" />
     <Text Include="vertexShader.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\acacia_003.gem" />
+    <None Include="Resource\TRex.gem" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
