@@ -140,10 +140,13 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ShaderReflection.h" />
     <ClInclude Include="Shaders.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="3D_vertexShader.txt" />
+    <Text Include="newPixelShader.txt" />
     <Text Include="pixelShader.txt" />
     <Text Include="vertexShader.txt" />
   </ItemGroup>

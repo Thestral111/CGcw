@@ -17,6 +17,8 @@ public:
 	ID3D11VertexShader* vertexShader;
 	ID3D11PixelShader* pixelShader;
     ID3D11InputLayout* layout;
+    std::map<std::string, int> textureBindPoints;
+
 
 
 	std::string readfile(std::string filename) {
@@ -90,6 +92,13 @@ public:
         for (int i = 0; i < psConstantBuffers.size(); i++) {
             psConstantBuffers[i].upload(&core);
         }
+        //core.devicecontext->PSSetShaderResources(0, 1, &srv);
+
+
+    }
+
+    void updateShaderResource(DXCore& core, string name,ID3D11ShaderResourceView* srv) {
+        core.devicecontext->PSSetShaderResources(textureBindPoints[name], 1, &srv);
 
     }
 

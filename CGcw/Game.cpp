@@ -6,29 +6,49 @@
 #include "geometry.h"
 #include "GamesEngineeringBase.h"
 #include "GEMLoader.h"
+#include "Texture.h"
 
 
-void loadTree(DXCore& dxcore, vector<mesh>& meshes) {
+class StaticModel
+{
+public:
+	std::vector<std::string> textureFilenames;
+	vector<mesh> meshes;
+	Texture texture;
+	Shader shader;
+	//TextureManager* textureManager;
 
-	string filename = "Resource/acacia_003.gem";
-	GEMLoader::GEMModelLoader loader;
-	std::vector<GEMLoader::GEMMesh> gemmeshes;
-	loader.load(filename, gemmeshes);
-	for (int i = 0; i < gemmeshes.size(); i++) {
-		mesh mesh;
-		std::vector<STATIC_VERTEX> vertices;
-		for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
-			STATIC_VERTEX v;
-			memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
-			vertices.push_back(v);
+	void load(DXCore& dxcore, string filename, TextureManager& textureManager) {
+
+		GEMLoader::GEMModelLoader loader;
+		std::vector<GEMLoader::GEMMesh> gemmeshes;
+		loader.load(filename, gemmeshes);
+		for (int i = 0; i < gemmeshes.size(); i++) {
+			mesh mesh;
+			std::vector<STATIC_VERTEX> vertices;
+			for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
+				STATIC_VERTEX v;
+				memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
+				vertices.push_back(v);
+			}
+			mesh.init(vertices, gemmeshes[i].indices, dxcore);
+			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
+			textureManager.load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
+			//textureManager->load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
+			//textureManager.load(dxcore, "bark09.png");
+			//textureManager.load(dxcore, "pine branch.png");
+			meshes.push_back(mesh);
 		}
-		mesh.init(vertices, gemmeshes[i].indices, dxcore);
-		meshes.push_back(mesh);
 	}
-
-
-
-}
+	void draw(DXCore& dxcore, TextureManager& textureManager)
+	{
+		for (int i = 0; i < meshes.size(); i++)
+		{
+			shader.updateShaderResource(dxcore, "tex", textureManager.find(textureFilenames[i]));
+			meshes[i].draw(dxcore);
+		}
+	}
+};
 
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
@@ -40,19 +60,25 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	cube cube;
 	Matrix planeWorld;
 	Matrix world;
+	TextureManager textureManager;
+	
 	world = world.scaling(Vec3(0.01f, 0.01f, 0.01f));
 	GamesEngineeringBase :: Timer timer;
 	win.init(1024, 1024, "My Window");
 	dxcore.init(1024, 1024, win.hwnd, 0);
-	shader.init("3D_vertexShader.txt", "pixelShader.txt", dxcore);
-	std::vector<mesh> meshes;
+	shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore);
+	//textureManager.load(dxcore, "Textures/bark09.png");
+	//std::vector<mesh> meshes;
 
-	loadTree(dxcore, meshes);
+	//loadTree(dxcore, meshes);
 
 	//tri.init(dxcore);
 	//plane.init(dxcore);
 	cube.init(dxcore);
 	Matrix x;
+
+	StaticModel tree;
+	tree.load(dxcore, "Resource/pine.gem", textureManager);
 
 	float t = 0;
 	//x = x.LookAt(Vec3(10, 5, 10), Vec3(0, 1, 0), Vec3(0, 1, 0));
@@ -87,10 +113,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			//tri.draw(dxcore);
 			//plane.draw(dxcore);
 			//cube.draw(dxcore);
-			for (int i = 0; i < meshes.size(); i++)
-			{
-				meshes[i].draw(dxcore);
-			}
+			tree.draw(dxcore, textureManager);
 
 			/*win.processMessages();*/
 			dxcore.present();
