@@ -81,7 +81,11 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\acacia_003.gem" />
-    <None Include="Resource\TRex.gem" />
+    <None Include="Resource\TRex.gem">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resource\acacia_003.gem">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

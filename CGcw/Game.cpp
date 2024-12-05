@@ -56,6 +56,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	Window win;
 	DXCore dxcore;
 	Shader shader;
+	Shader animShader;
 	//Triangle tri;
 	plane plane;
 	cube cube;
@@ -69,18 +70,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	win.init(1024, 1024, "My Window");
 	dxcore.init(1024, 1024, win.hwnd, 0);
 	shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore);
-	//shader.initAnim("Animation_vertexShader.txt", "newPixelShader.txt", dxcore);
+	animShader.initAnim("Animation_vertexShader.txt", "pixelShader.txt", dxcore);
 
-	//instance.init("TRex.gem", dxcore);
+	instance.init("TRex.gem", dxcore);
 	// 
-	//textureManager.load(dxcore, "Textures/bark09.png");
+	textureManager.load(dxcore, "Textures/bark09.png");
 	//std::vector<mesh> meshes;
 
 	//loadTree(dxcore, meshes);
 
 	//tri.init(dxcore);
 	//plane.init(dxcore);
-	cube.init(dxcore);
+	//cube.init(dxcore);
 	Matrix x;
 
 	StaticModel tree;
@@ -96,7 +97,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		while (true)
 		{
 			//float t;
-			t += timer.dt();
+			float dt = timer.dt();
+			t += dt;
 			Vec3 from = Vec3(11 * cos(t), 5, 11 * sinf(t));
 			//Vec3 from = Vec3(10, 5, 10);
 			//Matrix v = v.lookAt(from, Vec3(0, 1, 0), Vec3(0, 1, 0));
@@ -110,20 +112,33 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			dxcore.clear();
 			win.processMessages();
 
-			//instance.update("Run", t);
+			
 			// planeworld is the rotation, translation and scale
 			// vp is lookat and projection
-			shader.updateConstantVS("staticMeshBuffer", "staticMeshBuffer", "W", &world); // planeWorld
-			shader.updateConstantVS("staticMeshBuffer", "staticMeshBuffer", "VP", &vp); // StaticModel
+			//shader.updateConstantVS("staticMeshBuffer", "staticMeshBuffer", "W", &world); // planeWorld
+			//shader.updateConstantVS("staticMeshBuffer", "staticMeshBuffer", "VP", &vp); // StaticModel
 			//shader.updateConstantVS("Animated", "staticMeshBuffer", "bones", instance.matrices); //anim
 
-			//instance.draw(dxcore);
+			//shader.apply(dxcore);
+			//tree.draw(dxcore, textureManager);
 
-			shader.apply(dxcore);
+			Matrix w1;
+			w1 = Matrix::translation(Vec3(1, 0, 0));
+			instance.update("Run", dt);
+			animShader.updateConstantVS("animatedMeshBuffer", "W", &w1); // planeWorld
+			animShader.updateConstantVS("animatedMeshBuffer", "VP", &vp); // StaticModel
+			animShader.updateConstantVS("animatedMeshBuffer", "bones", instance.matrices); //anim
+			
+			
+			//shader.apply(dxcore);
+			//animShader.apply(dxcore);
 			//tri.draw(dxcore);
 			//plane.draw(dxcore);
 			//cube.draw(dxcore);
-			tree.draw(dxcore, textureManager);
+			//tree.draw(dxcore, textureManager);
+			animShader.apply(dxcore);
+			
+			instance.draw(dxcore);
 
 			/*win.processMessages();*/
 			dxcore.present();

@@ -102,17 +102,17 @@ public:
 
     }
 
-    void updateConstantVS(string name, string constantBufferName, string variableName, void* data) {
+    void updateConstantVS(string constantBufferName, string variableName, void* data) {
         for (int i = 0; i < vsConstantBuffers.size(); i++) {
-            if (vsConstantBuffers[i].name == name) {
+            if (vsConstantBuffers[i].name == constantBufferName) {
                 vsConstantBuffers[i].update(variableName, data);
             }
         }
     }
 
-    void updateConstantPS(string name, string constantBufferName, string variableName, void* data) {
+    void updateConstantPS(string constantBufferName, string variableName, void* data) {
         for (int i = 0; i < psConstantBuffers.size(); i++) {
-            if (psConstantBuffers[i].name == name) {
+            if (psConstantBuffers[i].name == constantBufferName) {
                 psConstantBuffers[i].update(variableName, data);
             }
         }

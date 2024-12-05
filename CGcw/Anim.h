@@ -96,7 +96,7 @@ public:
 
 	void calcFinalTransforms(Matrix* matrices)
 	{
-		for (int i = 0; i < this->bonesSize(); i++)
+		for (int i = 0; i < 44; i++) // this->bonesSize()
 		{
 			matrices[i] = matrices[i] * skeleton.bones[i].offset * skeleton.globalInverse;
 		}
@@ -110,7 +110,7 @@ public:
 class AnimationInstance
 {
 public:
-	Animation* animation;
+	Animation animation;
 	std::string currentAnimation;
 	float t;
 	Matrix matrices[256];
@@ -122,7 +122,7 @@ public:
 	}
 	bool animationFinished()
 	{
-		if (t > animation->animations[currentAnimation].duration())
+		if (t > animation.animations[currentAnimation].duration())
 		{
 			return true;
 		}
@@ -139,12 +139,12 @@ public:
 		if (animationFinished() == true) { resetAnimationTime(); }
 		int frame = 0;
 		float interpolationFact = 0;
-		animation->calcFrame(name, t, frame, interpolationFact);
-		for (int i = 0; i < animation->bonesSize(); i++)
+		animation.calcFrame(name, t, frame, interpolationFact);
+		for (int i = 0; i < animation.bonesSize(); i++)
 		{
-			matrices[i] = animation->interpolateBoneToGlobal(name, matrices, frame, interpolationFact, i);
+			matrices[i] = animation.interpolateBoneToGlobal(name, matrices, frame, interpolationFact, i);
 		}
-		animation->calcFinalTransforms(matrices);
+		animation.calcFinalTransforms(matrices);
 	}
 
 	void init(std::string filename, DXCore& core) {
@@ -171,7 +171,7 @@ public:
 			bone.name = gemanimation.bones[i].name;
 			memcpy(&bone.offset, &gemanimation.bones[i].offset, 16 * sizeof(float));
 			bone.parentIndex = gemanimation.bones[i].parentIndex;
-			animation->skeleton.bones.push_back(bone);
+			animation.skeleton.bones.push_back(bone);
 		}
 
 		// load in anim data
@@ -197,7 +197,7 @@ public:
 				}
 				aseq.frames.push_back(frame);
 			}
-			animation->animations.insert({ name, aseq });
+			animation.animations.insert({ name, aseq });
 		}
 
 
