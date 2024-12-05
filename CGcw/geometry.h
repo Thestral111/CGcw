@@ -1,6 +1,10 @@
 #pragma once
 #include "cgmath.h"
 #include "Device.h"
+#include "Shaders.h"
+#include "Texture.h"
+#include "GEMLoader.h"
+
 
 
 DXCore core1;
@@ -17,6 +21,18 @@ struct STATIC_VERTEX
 	float tu;
 	float tv;
 };
+
+struct ANIMATED_VERTEX
+{
+	Vec3 pos;
+	Vec3 normal;
+	Vec3 tangent;
+	float tu;
+	float tv;
+	unsigned int bonesIDs[4];
+	float boneWeights[4];
+};
+
 
 class mesh
 {
@@ -48,6 +64,11 @@ public:
 	void init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& core)
 	{
 		init(&vertices[0], sizeof(STATIC_VERTEX), vertices.size(), &indices[0], indices.size(), core);
+	}
+
+	void init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& device)
+	{
+		init(&vertices[0], sizeof(ANIMATED_VERTEX), vertices.size(), &indices[0], indices.size(), device);
 	}
 
 	void draw(DXCore& core) {
@@ -181,6 +202,58 @@ public:
 
 	void draw(DXCore& core) {
 		geometry.draw(core);
+	}
+
+};
+
+
+class StaticModel
+{
+public:
+	std::vector<std::string> textureFilenames;
+	vector<mesh> meshes;
+	Texture texture;
+	Shader shader;
+	//TextureManager* textureManager;
+
+	void load(DXCore& dxcore, string filename, TextureManager& textureManager) {
+
+		GEMLoader::GEMModelLoader loader;
+		std::vector<GEMLoader::GEMMesh> gemmeshes;
+		loader.load(filename, gemmeshes);
+		for (int i = 0; i < gemmeshes.size(); i++) {
+			mesh mesh;
+			std::vector<STATIC_VERTEX> vertices;
+			for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
+				STATIC_VERTEX v;
+				memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
+				vertices.push_back(v);
+			}
+			mesh.init(vertices, gemmeshes[i].indices, dxcore);
+			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
+			textureManager.load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
+			//textureManager->load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
+			//textureManager.load(dxcore, "bark09.png");
+			//textureManager.load(dxcore, "pine branch.png");
+			meshes.push_back(mesh);
+		}
+	}
+	void draw(DXCore& dxcore, TextureManager& textureManager)
+	{
+		for (int i = 0; i < meshes.size(); i++)
+		{
+			shader.updateShaderResource(dxcore, "tex", textureManager.find(textureFilenames[i]));
+			meshes[i].draw(dxcore);
+		}
+	}
+};
+
+class AnimModoel {
+public:
+	mesh geometry;
+	void init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& core)
+	{
+		geometry.init(&vertices[0], sizeof(ANIMATED_VERTEX), vertices.size(), &indices[0], indices.size(), core);
 	}
 
 };

@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Adapter.h" />
+    <ClInclude Include="Anim.h" />
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="GamesEngineeringBase.h" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="3D_vertexShader.txt" />
+    <Text Include="Animation_vertexShader.txt" />
     <Text Include="newPixelShader.txt" />
     <Text Include="pixelShader.txt" />
     <Text Include="vertexShader.txt" />

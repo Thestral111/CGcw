@@ -50,6 +50,18 @@
     <ClInclude Include="GamesEngineeringBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GEMLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Anim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="pixelShader.txt">
@@ -61,5 +73,15 @@
     <Text Include="3D_vertexShader.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="Animation_vertexShader.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="newPixelShader.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\acacia_003.gem" />
+    <None Include="Resource\TRex.gem" />
   </ItemGroup>
 </Project>

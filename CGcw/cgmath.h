@@ -359,7 +359,10 @@ public:
 		return projection;
 	}
 
-	
+	Matrix operator*(const Matrix& matrix)
+	{
+		return mul(matrix);
+	}
 
 	
 
@@ -458,6 +461,85 @@ public:
 	Colour operator/(const float other) const {
 		return Colour(r / other, g / other, b / other, a / other);
 	}*/
+
+};
+
+
+class Quaternion {
+public:
+	union {
+		struct {
+			float a;
+			float b;
+			float c;
+			float d;
+		};
+		float q[4];
+	};
+	Quaternion() {
+		a = 0;
+		b = 0;
+		c = 0;
+		d = 0;
+	}
+	Quaternion(float _a, float _b, float _c, float _d) {
+		a = _a;
+		b = _b;
+		c = _c;
+		d = _d;
+	}
+
+	float mod(Quaternion q0) {
+		return float(sqrt(q0.a * q0.a + q0.b * q0.b + q0.c * q0.c + q0.d * q0.d));
+	}
+
+	float Dot(const Quaternion q) const {
+		return float(a * q.a + b * q.b + c * q.c + d * q.d);
+	}
+
+	static Quaternion Slerp(const Quaternion q0, const Quaternion q1, float t) {
+		float dot = q0.Dot(q1);
+		Quaternion q1New = q1;
+		// if dot product is negative, need to negate q1 to make sure the path is shortest
+		if (dot < 0) {
+			q1New = Quaternion(-q1.a, -q1.b, -q1.c, -q1.d);
+			dot = -dot; // change dot to positive
+		}
+
+		// angle between the quaternions
+		float theta = acosf(dot);
+		if (theta == 0)
+		{
+			return q0;
+		}
+		float sinTheta = sinf(theta);
+		// weight
+		float weight0 = sinf((1 - t) * theta) / sinTheta;
+		float weight1 = sinf(t * theta) / sinTheta;
+		return Quaternion(weight0 * q0.a + weight1 * q1New.a,
+			weight0 * q0.b + weight1 * q1New.b,
+			weight0 * q0.c + weight1 * q1New.c,
+			weight0 * q0.d + weight1 * q1New.d);
+	}
+
+	Matrix toMatrix() {
+		Matrix temp;
+		temp.m[0] = 1 - 2 * b * b - 2 * c * c;
+		temp.m[1] = 2 * a * b - 2 * c * d;
+		temp.m[2] = 2 * a * c + 2 * b * d;
+		temp.m[3] = 0;
+
+		temp.m[4] = 2 * a * b + 2 * c * d;
+		temp.m[5] = 1 - 2 * a * a - 2 * c * c;
+		temp.m[6] = 2 * b * c - 2 * a * d;
+		temp.m[7] = 0;
+
+		temp.m[8] = 2 * a * c - 2 * b * d;
+		temp.m[9] = 2 * b * c + 2 * a * d;
+		temp.m[10] = 1 - 2 * a * a - 2 * b * b;
+		temp.m[11] = 0;
+		return temp;
+	}
 
 };
 
