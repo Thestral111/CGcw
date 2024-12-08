@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="Adapter.h" />
     <ClInclude Include="Anim.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="GamesEngineeringBase.h" />

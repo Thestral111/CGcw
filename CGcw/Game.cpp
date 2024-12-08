@@ -8,6 +8,7 @@
 #include "GEMLoader.h"
 #include "Texture.h"
 #include "Anim.h"
+#include "Camera.h"
 
 
 //class StaticModel
@@ -56,20 +57,25 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	Window win;
 	DXCore dxcore;
 	Shader shader;
+	Shader shader1;
 	Shader animShader;
 	//Triangle tri;
 	plane plane;
 	cube cube;
 	Matrix planeWorld;
 	Matrix world;
+	Matrix v1;
+	Matrix p1;
 	TextureManager textureManager;
 	AnimationInstance instance;
+	Camera camera;
 	
 	world = world.scaling(Vec3(0.01f, 0.01f, 0.01f));
 	GamesEngineeringBase :: Timer timer;
 	win.init(1024, 1024, "My Window");
 	dxcore.init(1024, 1024, win.hwnd, 0);
 	shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore);
+	shader1.init("3D_vertexShader.txt", "pixelShader.txt", dxcore);
 	animShader.initAnim("Animation_vertexShader.txt", "pixelShader.txt", dxcore);
 
 	instance.init("TRex.gem", dxcore);
@@ -80,7 +86,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	//loadTree(dxcore, meshes);
 
 	//tri.init(dxcore);
-	//plane.init(dxcore);
+	plane.init(dxcore);
 	//cube.init(dxcore);
 	Matrix x;
 
@@ -93,6 +99,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	{
 		cout << var << endl;
 	}
+	int lastMouseX = win.mousex;
+	int lastMouseY = win.mousey;
 
 		while (true)
 		{
@@ -102,11 +110,43 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			Vec3 from = Vec3(11 * cos(t), 5, 11 * sinf(t));
 			//Vec3 from = Vec3(10, 5, 10);
 			//Matrix v = v.lookAt(from, Vec3(0, 1, 0), Vec3(0, 1, 0));
-			Matrix p = p.Perspective(20.f, 1.f, 0.1f, 100.f);
+			Matrix p = p1.Perspective(20.f, 1.f, 0.1f, 100.f);
+			//Matrix p = p.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
 			//Matrix vp = v.mul(p);
 			Vec3 to = Vec3(0.0f, 0.0f, 0.0f);
 			Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
-			Matrix vp = vp.lookAt(from, to, up).mul(p); //vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f)
+			//Matrix vp = vp.lookAt(from, to, up).mul(p); //vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f)
+			Matrix v = v1.lookAt(from, to, up);
+
+			Vec3 forward = camera.getForwardDirection();
+			Vec3 right = camera.getRightDirection();
+
+			if (win.keys['W']) camera.move(forward, dt);
+			if (win.keys['S']) camera.move(-forward, dt);
+			if (win.keys['D']) camera.move(right, dt);
+			if (win.keys['A']) camera.move(-right, dt);
+
+			// Mouse input for rotation
+
+			if (win.mouseButtons[0]) { // Left mouse button is pressed
+				int currentMouseX = win.mousex;
+				int currentMouseY = win.mousey;
+
+				float xOffset = static_cast<float>(currentMouseX - lastMouseX);
+				float yOffset = static_cast<float>(currentMouseY - lastMouseY);
+
+				camera.rotate(xOffset, yOffset);
+
+				lastMouseX = currentMouseX;
+				lastMouseY = currentMouseY;
+			}
+			else {
+				lastMouseX = win.mousex;
+				lastMouseY = win.mousey;
+			}
+
+			Matrix view = camera.getLookat();
+			Matrix vp = view * p;
 			//Matrix vp = vp.lookAt(from, to, up).mul(p);
 
 			dxcore.clear();
@@ -115,16 +155,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			
 			// planeworld is the rotation, translation and scale
 			// vp is lookat and projection
-			//shader.updateConstantVS("staticMeshBuffer", "staticMeshBuffer", "W", &world); // planeWorld
-			//shader.updateConstantVS("staticMeshBuffer", "staticMeshBuffer", "VP", &vp); // StaticModel
+			shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
+			//shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
+			shader.updateConstantVS("staticMeshBuffer", "VP", &vp); // StaticModel
 			//shader.updateConstantVS("Animated", "staticMeshBuffer", "bones", instance.matrices); //anim
 
-			//shader.apply(dxcore);
-			//tree.draw(dxcore, textureManager);
+			shader.apply(dxcore);
+			tree.draw(dxcore, textureManager);
 
 			Matrix w1;
 			w1 = Matrix::translation(Vec3(1, 0, 0));
-			instance.update("Run", dt);
+			instance.update("roar", dt);
 			animShader.updateConstantVS("animatedMeshBuffer", "W", &w1); // planeWorld
 			animShader.updateConstantVS("animatedMeshBuffer", "VP", &vp); // StaticModel
 			animShader.updateConstantVS("animatedMeshBuffer", "bones", instance.matrices); //anim
@@ -133,13 +174,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			//shader.apply(dxcore);
 			//animShader.apply(dxcore);
 			//tri.draw(dxcore);
-			//plane.draw(dxcore);
 			//cube.draw(dxcore);
 			//tree.draw(dxcore, textureManager);
 			animShader.apply(dxcore);
 			
 			instance.draw(dxcore);
 
+			shader1.updateConstantVS("staticMeshBuffer", "W", &w1); // planeWorld
+			//shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
+			shader1.updateConstantVS("staticMeshBuffer", "VP", &vp);
+			shader1.apply(dxcore);
+			plane.draw(dxcore);
 			/*win.processMessages();*/
 			dxcore.present();
 		}

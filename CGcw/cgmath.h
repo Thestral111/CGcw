@@ -1,11 +1,12 @@
 #pragma once
 #include <cmath>
 #include <memory.h>
+#include <iostream>
 #define _USE_MATH_DEFINES
 #define SQ(x) ((x)*(x))
 #define max(a, b) (a > b ? a : b)
 #define min(a, b) (a < b ? a : b)
-
+//my math
 
 class Vec3
 {
@@ -225,7 +226,7 @@ public:
 	{
 		Matrix mat;
 		mat.a[0][3] = v.x;
-		mat.a[1][3] = v.x;
+		mat.a[1][3] = v.y;
 		mat.a[2][3] = v.z;
 		return mat;
 	}
@@ -489,42 +490,94 @@ public:
 		d = _d;
 	}
 
-	float mod(Quaternion q0) {
-		return float(sqrt(q0.a * q0.a + q0.b * q0.b + q0.c * q0.c + q0.d * q0.d));
+	float mod() {
+		//return float(sqrt(q0.a * q0.a + q0.b * q0.b + q0.c * q0.c + q0.d * q0.d));
+		return sqrt(a * a + b * b + c * c + d * d);
 	}
 
 	float Dot(const Quaternion q) const {
 		return float(a * q.a + b * q.b + c * q.c + d * q.d);
 	}
 
-	static Quaternion Slerp(const Quaternion q0, const Quaternion q1, float t) {
+	//static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
+	//	float dot = q0.Dot(q1);
+	//	if (dot < 0.0001f)
+	//	{
+	//		return q0;
+	//	}
+	//	Quaternion q1New = q1;
+	//	// if dot product is negative, need to negate q1 to make sure the path is shortest
+	//	if (dot < 0) {
+	//		q1New = Quaternion(-q1.a, -q1.b, -q1.c, -q1.d);
+	//		dot = -dot; // change dot to positive
+	//	}
+
+	//	// angle between the quaternions
+	//	float theta = acosf(dot);
+	//	if (theta == 0)
+	//	{
+	//		return q0;
+	//	}
+	//	float sinTheta = sinf(theta);
+	//	// weight
+	//	float weight0 = sinf((1 - t) * theta) / sinTheta;
+	//	float weight1 = sinf(t * theta) / sinTheta;
+	//	return Quaternion(weight0 * q0.a + weight1 * q1New.a,
+	//		weight0 * q0.b + weight1 * q1New.b,
+	//		weight0 * q0.c + weight1 * q1New.c,
+	//		weight0 * q0.d + weight1 * q1New.d);
+	//}
+
+	static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
+		// Compute the dot product between q0 and q1
 		float dot = q0.Dot(q1);
-		if (dot < 0.00001f)
+
+		if (dot < 0.0001f)
 		{
 			return q0;
 		}
-		Quaternion q1New = q1;
-		// if dot product is negative, need to negate q1 to make sure the path is shortest
-		if (dot < 0) {
-			q1New = Quaternion(-q1.a, -q1.b, -q1.c, -q1.d);
-			dot = -dot; // change dot to positive
+		// Ensure the dot product is in the range [-1, 1]
+		if (dot < -1.0f) dot = -1.0f;
+		if (dot > 1.0f) dot = 1.0f;
+
+		// If the dot product is negative, negate q1 to ensure the shortest path
+		Quaternion q1Copy = q1;
+		if (dot < 0.0f) {
+			dot = -dot;
+			q1Copy = Quaternion(-q1.a, -q1.b, -q1.c, -q1.d);
 		}
 
-		// angle between the quaternions
-		float theta = acosf(dot);
-		if (theta == 0)
-		{
-			return q0;
+		// If the quaternions are almost the same, perform linear interpolation
+		const float DOT_THRESHOLD = 0.9995f;
+		if (dot > DOT_THRESHOLD) {
+			Quaternion result(
+				q0.a + t * (q1Copy.a - q0.a),
+				q0.b + t * (q1Copy.b - q0.b),
+				q0.c + t * (q1Copy.c - q0.c),
+				q0.d + t * (q1Copy.d - q0.d)
+			);
+			// Normalize the result
+			float norm = result.mod();
+			return Quaternion(result.a / norm, result.b / norm, result.c / norm, result.d / norm);
 		}
+
+		// Calculate the angle between the quaternions
+		float theta = acosf(dot);
 		float sinTheta = sinf(theta);
-		// weight
-		float weight0 = sinf((1 - t) * theta) / sinTheta;
+
+		// Compute interpolation weights
+		float weight0 = sinf((1.0f - t) * theta) / sinTheta;
 		float weight1 = sinf(t * theta) / sinTheta;
-		return Quaternion(weight0 * q0.a + weight1 * q1New.a,
-			weight0 * q0.b + weight1 * q1New.b,
-			weight0 * q0.c + weight1 * q1New.c,
-			weight0 * q0.d + weight1 * q1New.d);
+
+		// Interpolate the quaternions
+		return Quaternion(
+			weight0 * q0.a + weight1 * q1Copy.a,
+			weight0 * q0.b + weight1 * q1Copy.b,
+			weight0 * q0.c + weight1 * q1Copy.c,
+			weight0 * q0.d + weight1 * q1Copy.d
+		);
 	}
+
 
 	Matrix toMatrix()
 	{
@@ -577,4 +630,132 @@ public:
 	}*/
 
 };
+
+
+//class Quaternion {
+//public:
+//	union {
+//		struct {
+//			float a;
+//			float b;
+//			float c;
+//			float d;
+//		};
+//		float q[4];
+//	};
+//
+//	// 默认构造函数
+//	Quaternion() : a(1), b(0), c(0), d(0) {}
+//
+//	// 参数化构造函数
+//	Quaternion(float _a, float _b, float _c, float _d) : a(_a), b(_b), c(_c), d(_d) {}
+//
+//	// 四元数加法
+//	Quaternion operator+(const Quaternion& q) const {
+//		return Quaternion(a + q.a, b + q.b, c + q.c, d + q.d);
+//	}
+//
+//	// 四元数减法
+//	Quaternion operator-(const Quaternion& q) const {
+//		return Quaternion(a - q.a, b - q.b, c - q.c, d - q.d);
+//	}
+//
+//	// 四元数乘法
+//	Quaternion operator*(const Quaternion& q) const {
+//		return Quaternion(
+//			a * q.a - b * q.b - c * q.c - d * q.d,
+//			a * q.b + b * q.a + c * q.d - d * q.c,
+//			a * q.c - b * q.d + c * q.a + d * q.b,
+//			a * q.d + b * q.c - c * q.b + d * q.a
+//		);
+//	}
+//
+//	// 标量乘法
+//	Quaternion operator*(float scalar) const {
+//		return Quaternion(a * scalar, b * scalar, c * scalar, d * scalar);
+//	}
+//
+//	// 点积
+//	static float dot(const Quaternion& q1, const Quaternion& q2) {
+//		return q1.a * q2.a + q1.b * q2.b + q1.c * q2.c + q1.d * q2.d;
+//	}
+//
+//	// 归一化
+//	void normalize() {
+//		float magnitude = std::sqrt(a * a + b * b + c * c + d * d);
+//		if (magnitude > 0.0f) {
+//			a /= magnitude;
+//			b /= magnitude;
+//			c /= magnitude;
+//			d /= magnitude;
+//		}
+//	}
+//
+//	// 线性插值 (LERP)
+//	static Quaternion lerp(const Quaternion& q1, const Quaternion& q2, float t) {
+//		return (q1 * (1 - t) + q2 * t).normalized();
+//	}
+//
+//	// 球形插值 (SLERP)
+//	static Quaternion slerp(const Quaternion& q1, const Quaternion& q2, float t) {
+//		float dot = Quaternion::dot(q1, q2);
+//		if (dot < 0.0f) {
+//			// 反转一个四元数以选择较短路径
+//			return slerp(q1, Quaternion(-q2.a, -q2.b, -q2.c, -q2.d), t);
+//		}
+//		dot = std::fmax(-1.0f, std::fmin(1.0f, dot));
+//		float theta = std::acos(dot);
+//		if (theta < 1e-6) {
+//			return lerp(q1, q2, t); // 当两四元数接近时，使用线性插值
+//		}
+//		float sinTheta = std::sin(theta);
+//		float weight1 = std::sin((1 - t) * theta) / sinTheta;
+//		float weight2 = std::sin(t * theta) / sinTheta;
+//		return (q1 * weight1 + q2 * weight2).normalized();
+//	}
+//
+//	// 转换为旋转矩阵 (行优先存储)
+//	Matrix toMatrix() const {
+//		float xx = q[0] * q[0];
+//		float xy = q[0] * q[1];
+//		float xz = q[0] * q[2];
+//		float yy = q[1] * q[1];
+//		float zz = q[2] * q[2];
+//		float yz = q[1] * q[2];
+//		float wx = q[3] * q[0];
+//		float wy = q[3] * q[1];
+//		float wz = q[3] * q[2];
+//		Matrix matrix;
+//		matrix.m[0] = 1.0f - 2.0f * (yy + zz);
+//		matrix.m[1] = 2.0f * (xy - wz);
+//		matrix.m[2] = 2.0f * (xz + wy);
+//		matrix.m[3] = 0.0;
+//		matrix.m[4] = 2.0f * (xy + wz);
+//		matrix.m[5] = 1.0f - 2.0f * (xx + zz);
+//		matrix.m[6] = 2.0f * (yz - wx);
+//		matrix.m[7] = 0.0;
+//		matrix.m[8] = 2.0f * (xz - wy);
+//		matrix.m[9] = 2.0f * (yz + wx);
+//		matrix.m[10] = 1.0f - 2.0f * (xx + yy);
+//		matrix.m[11] = 0.0;
+//		matrix.m[12] = 0;
+//		matrix.m[13] = 0;
+//		matrix.m[14] = 0;
+//		matrix.m[15] = 1;
+//		return matrix;
+//	}
+//
+//	// 归一化后的拷贝
+//	Quaternion normalized() const {
+//		Quaternion q(*this);
+//		q.normalize();
+//		return q;
+//	}
+//
+//	// 输出四元数
+//	friend std::ostream& operator<<(std::ostream& os, const Quaternion& q) {
+//		os << "(" << q.a << ", " << q.b << ", " << q.c << ", " << q.d << ")";
+//		return os;
+//	}
+//};
 

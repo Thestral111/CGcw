@@ -258,3 +258,41 @@ public:
 
 };
 
+class Skybox {
+private:
+	mesh cubeMesh;
+	Shader skyboxShader;
+	Texture cubemap;
+
+public:
+	void init(DXCore& dxcore, const std::vector<std::string>& cubemapFaces) {
+		// Initialize the cube mesh
+		//cubeMesh.initAsCube(dxcore, true); // Inverted cube
+
+		// Load the skybox shader
+		skyboxShader.init("SkyboxVertexShader.txt", "SkyboxPixelShader.txt", dxcore);
+
+		// Load the cubemap texture
+		//cubemap.loadCubemap(dxcore, cubemapFaces);
+	}
+
+	void render(DXCore& dxcore, const Matrix& view, const Matrix& projection) {
+		// Prepare the skybox view matrix (remove translation part)
+		Matrix skyboxView = view;
+		skyboxView.m[12] = skyboxView.m[13] = skyboxView.m[14] = 0;
+
+		// Combine view and projection matrices
+		Matrix vp = skyboxView * projection;
+
+		// Update shader constants
+		skyboxShader.updateConstantVS("staticMeshBuffer", "vp", &vp);
+
+		// Bind the cubemap
+		//skyboxShader.updateShaderResource(dxcore, "cubemap", cubemap);
+
+		// Apply shader and draw
+		skyboxShader.apply(dxcore);
+		cubeMesh.draw(dxcore);
+	}
+};
+

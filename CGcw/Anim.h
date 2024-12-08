@@ -1,13 +1,14 @@
 #pragma once
-#include <Windows.h>
-#include "Window.h"
-#include "Device.h"
-#include "Shaders.h"
-#include "Mesh.h"
-#include "geometry.h"
-#include "GamesEngineeringBase.h"
-#include "GEMLoader.h"
-#include "Texture.h"
+//#include <Windows.h>
+//#include "Window.h"
+//#include "Device.h"
+//#include "Shaders.h"
+//#include "Mesh.h"
+//#include "geometry.h"
+//#include "GamesEngineeringBase.h"
+//#include "GEMLoader.h"
+//#include "Texture.h"
+//#include "GraphicMath.h"
 
 
 struct Bone
@@ -63,10 +64,21 @@ public:
 		Matrix scale = Matrix::scaling(interpolate(frames[baseFrame].scales[boneIndex], frames[nextFrame(baseFrame)].scales[boneIndex], interpolationFact));
 		Matrix rotation = interpolate(frames[baseFrame].rotations[boneIndex], frames[nextFrame(baseFrame)].rotations[boneIndex], interpolationFact).toMatrix();
 		Matrix translation = Matrix::translation(interpolate(frames[baseFrame].positions[boneIndex], frames[nextFrame(baseFrame)].positions[boneIndex], interpolationFact));
-		Matrix local = translation * rotation * scale;
+		//Matrix local = translation * rotation * scale;
+
+		//int nextFrameIndex = nextFrame(baseFrame);
+		//Matrix temp;
+		//// interpolate scale, rotation and translation
+		//Matrix scale = temp.scaling(interpolate(frames[baseFrame].scales[boneIndex], frames[nextFrameIndex].scales[boneIndex], interpolationFact));
+		//Matrix rotation = interpolate(frames[baseFrame].rotations[boneIndex], frames[nextFrameIndex].rotations[boneIndex], interpolationFact).toMatrix();
+		//Matrix translation = Matrix::translation(interpolate(frames[baseFrame].positions[boneIndex], frames[nextFrameIndex].positions[boneIndex], interpolationFact));
+		Matrix local = scale * rotation * translation;
+		//Matrix local = scale * translation * rotation;
+
 		if (skeleton->bones[boneIndex].parentIndex > -1)
 		{
-			Matrix global = matrices[skeleton->bones[boneIndex].parentIndex] * local;
+			//Matrix global = matrices[skeleton->bones[boneIndex].parentIndex] * local;
+			Matrix global = local * matrices[skeleton->bones[boneIndex].parentIndex];
 			return global;
 		}
 		return local;
@@ -85,7 +97,7 @@ public:
 	void calcFrame(std::string name, float t, int& frame, float& interpolationFact) {
 		animations[name].calcFrame(t, frame, interpolationFact);
 	}
-	Matrix interpolateBoneToGlobal(std::string name, Matrix* matrices, int baseFrame, float 						interpolationFact, int boneIndex) {
+	Matrix interpolateBoneToGlobal(std::string name, Matrix* matrices, int baseFrame, float interpolationFact, int boneIndex) {
 		return animations[name].interpolateBoneToGlobal(matrices, baseFrame, interpolationFact, &skeleton, boneIndex);
 	}
 
@@ -98,7 +110,9 @@ public:
 	{
 		for (int i = 0; i < 44; i++) // this->bonesSize()
 		{
-			matrices[i] = matrices[i] * skeleton.bones[i].offset * skeleton.globalInverse;
+			//matrices[i] = matrices[i] * skeleton.bones[i].offset * skeleton.globalInverse;
+			//matrices[i] = skeleton.bones[i].offset * matrices[i] * skeleton.globalInverse;
+			matrices[i] = skeleton.bones[i].offset * matrices[i] * skeleton.globalInverse;
 		}
 	}
 
