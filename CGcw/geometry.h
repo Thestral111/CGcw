@@ -259,40 +259,50 @@ public:
 };
 
 class Skybox {
-private:
-	mesh cubeMesh;
-	Shader skyboxShader;
-	Texture cubemap;
-
 public:
+	cube skyCube;            // The skybox cube
+	Shader skyShader;        // Skybox shader
+	Texture cubemapTexture;  // Cubemap texture
+
 	void init(DXCore& dxcore, const std::vector<std::string>& cubemapFaces) {
 		// Initialize the cube mesh
-		//cubeMesh.initAsCube(dxcore, true); // Inverted cube
+		skyCube.init(dxcore);
 
-		// Load the skybox shader
-		skyboxShader.init("SkyboxVertexShader.txt", "SkyboxPixelShader.txt", dxcore);
+		// Initialize the shader
+		skyShader.init("skyboxVertexShader.txt", "skyboxPixelShader.txt", dxcore);
 
 		// Load the cubemap texture
-		//cubemap.loadCubemap(dxcore, cubemapFaces);
+		cubemapTexture.loadCubemap(dxcore, cubemapFaces);
 	}
 
-	void render(DXCore& dxcore, const Matrix& view, const Matrix& projection) {
-		// Prepare the skybox view matrix (remove translation part)
-		Matrix skyboxView = view;
-		skyboxView.m[12] = skyboxView.m[13] = skyboxView.m[14] = 0;
+	void render(DXCore& dxcore, Camera& camera, const Matrix& projection) {
+		// Disable depth writes
+		D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+		depthStencilDesc.DepthEnable = TRUE;
+		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
-		// Combine view and projection matrices
-		Matrix vp = skyboxView * projection;
+		ID3D11DepthStencilState* depthStencilState;
+		dxcore.device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+		dxcore.devicecontext->OMSetDepthStencilState(depthStencilState, 0);
 
-		// Update shader constants
-		skyboxShader.updateConstantVS("staticMeshBuffer", "vp", &vp);
+		// Set the view matrix without translation
+		Matrix view = camera.getViewMatrix();
+		view.m[12] = view.m[13] = view.m[14] = 0; // Remove translation
 
-		// Bind the cubemap
-		//skyboxShader.updateShaderResource(dxcore, "cubemap", cubemap);
+		// Pass matrices to the shader
+		Matrix vp = view * projection;
+		skyShader.updateConstantVS("staticMeshBuffer", "VP", &vp);
 
-		// Apply shader and draw
-		skyboxShader.apply(dxcore);
-		cubeMesh.draw(dxcore);
+		// Bind the cubemap texture
+		skyShader.updateShaderResource(dxcore, "tex", cubemapTexture.srv);
+
+		// Apply the shader and render the skybox
+		skyShader.apply(dxcore);
+		skyCube.draw(dxcore);
+
+		// Restore the original depth state
+		depthStencilState->Release();
 	}
 };
 

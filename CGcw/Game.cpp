@@ -69,6 +69,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	TextureManager textureManager;
 	AnimationInstance instance;
 	Camera camera;
+	Skybox skybox;
 	
 	world = world.scaling(Vec3(0.01f, 0.01f, 0.01f));
 	GamesEngineeringBase :: Timer timer;
@@ -92,6 +93,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	StaticModel tree;
 	tree.load(dxcore, "Resource/pine.gem", textureManager);
+
+	std::vector<std::string> cubemapFaces = {
+		"Textures/right.jpg",  "Textures/left.jpg",
+		"Textures/top.jpg",    "Textures/bottom.jpg",
+		"Textures/front.jpg",  "Textures/back.jpg"
+	};
+	skybox.init(dxcore, cubemapFaces);
 
 	float t = 0;
 	//x = x.LookAt(Vec3(10, 5, 10), Vec3(0, 1, 0), Vec3(0, 1, 0));

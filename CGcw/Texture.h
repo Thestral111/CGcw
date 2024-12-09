@@ -71,6 +71,74 @@ public:
 
 	}
 
+    void loadCubemap(DXCore& dxcore, const std::vector<std::string>& faces) {
+        // Ensure the faces vector has 6 textures
+        if (faces.size() != 6) {
+            throw std::runtime_error("Cubemap requires exactly 6 images (one for each face).");
+        }
+
+        // Load the images for each face
+        int width = 0, height = 0, channels = 0;
+        std::vector<unsigned char*> faceData;
+        for (const auto& face : faces) {
+            unsigned char* data = stbi_load(face.c_str(), &width, &height, &channels, STBI_rgb_alpha); // Load as RGBA
+            if (!data) {
+                throw std::runtime_error("Failed to load cubemap face: " + face);
+            }
+            faceData.push_back(data);
+        }
+
+        // Create the texture description
+        D3D11_TEXTURE2D_DESC texDesc = {};
+        texDesc.Width = width;
+        texDesc.Height = height;
+        texDesc.MipLevels = 1;
+        texDesc.ArraySize = 6; // 6 faces for the cubemap
+        texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // Ensure format is compatible with the image data
+        texDesc.Usage = D3D11_USAGE_DEFAULT;
+        texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        texDesc.CPUAccessFlags = 0;
+        texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+        texDesc.SampleDesc.Count = 1;
+        texDesc.SampleDesc.Quality = 0;
+
+        // Subresource data for each face
+        D3D11_SUBRESOURCE_DATA subresourceData[6] = {};
+        for (int i = 0; i < 6; ++i) {
+            subresourceData[i].pSysMem = faceData[i];
+            subresourceData[i].SysMemPitch = width * 4; // 4 bytes per pixel (RGBA)
+        }
+
+        // Create the cubemap texture
+        ID3D11Texture2D* cubemapTexture;
+        HRESULT hr = dxcore.device->CreateTexture2D(&texDesc, subresourceData, &cubemapTexture);
+        if (FAILED(hr)) {
+            throw std::runtime_error("Failed to create cubemap texture.");
+        }
+
+        // Create a shader resource view for the cubemap
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Format = texDesc.Format;
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+        srvDesc.TextureCube.MostDetailedMip = 0;
+        srvDesc.TextureCube.MipLevels = 1;
+
+        hr = dxcore.device->CreateShaderResourceView(cubemapTexture, &srvDesc, &srv);
+        if (FAILED(hr)) {
+            throw std::runtime_error("Failed to create cubemap shader resource view.");
+        }
+
+        // Release image data and the texture resource
+        cubemapTexture->Release();
+        for (auto data : faceData) {
+            stbi_image_free(data);
+        }
+
+        // Bind the sampler
+        sampler.init(dxcore);
+        sampler.bind(dxcore);
+    }
+
     void init(DXCore& dxcore, int width, int height, int channels, DXGI_FORMAT format, unsigned char* data) {
         D3D11_TEXTURE2D_DESC texDesc;
         memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));

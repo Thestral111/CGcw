@@ -1,0 +1,15 @@
+TextureCube tex : register(t0); // Cubemap texture
+SamplerState samplerLinear : register(s0);
+
+struct PS_INPUT
+{
+    float4 Pos : SV_POSITION;
+    float3 TexCoords : TEXCOORD; // 3D coordinates for the cubemap
+};
+
+float4 PS(PS_INPUT input) : SV_Target0
+{
+    // Sample the cubemap using 3D texture coordinates
+    float4 colour = tex.Sample(samplerLinear, input.TexCoords);
+    return float4(colour.rgb, 1.0); // Return RGB with alpha set to 1
+}

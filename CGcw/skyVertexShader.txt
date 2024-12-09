@@ -1,0 +1,26 @@
+cbuffer staticMeshBuffer
+{
+    float4x4 VP; // Combined View and Projection Matrix
+};
+
+struct VS_INPUT
+{
+    float4 Pos : POS;
+    float3 Normal : NORMAL;
+    float3 Tangent : TANGENT;
+    float2 TexCoords : TEXCOORD;
+};
+
+struct PS_INPUT
+{
+    float4 Pos : SV_POSITION;
+    float3 TexCoords : TEXCOORD; // Modified to output 3D coordinates
+};
+
+PS_INPUT VS(VS_INPUT input)
+{
+    PS_INPUT output;
+    output.Pos = mul(input.Pos, VP); // Transform the position using VP
+    output.TexCoords = input.Pos.xyz; // Use position as 3D texture coordinates
+    return output;
+}
