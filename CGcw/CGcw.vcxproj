@@ -150,6 +150,8 @@
     <Text Include="3D_vertexShader.txt" />
     <Text Include="Animation_vertexShader.txt" />
     <Text Include="newPixelShader.txt" />
+    <Text Include="normalPixelShader.txt" />
+    <Text Include="normalVertexShader.txt" />
     <Text Include="pixelShader.txt" />
     <Text Include="skyPixelShader.txt" />
     <Text Include="skyVertexShader.txt" />

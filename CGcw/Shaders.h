@@ -218,6 +218,22 @@ public:
 
     }
 
+    void initWithNormal(std::string vsfilename, std::string psfilename, DXCore& dxcore) {
+        //*core = dxcore;
+        std::string vs = readfile(vsfilename);
+        std::string ps = readfile(psfilename);
+        // TODO: 
+        // compileVS
+        //compileVS(vs, dxcore);
+        loadVS(dxcore, vs);
+        //compilePS(ps, dxcore);
+        loadPS(dxcore, ps);
+        // Texture binding points
+        textureBindPoints["tex"] = 0;        // Diffuse texture (t0)
+        textureBindPoints["normalMap"] = 1; // Normal map (t1)
+
+    }
+
 
 };
 

@@ -1,0 +1,2 @@
+update shader and constant buffer in model draw instead of main
+instancing

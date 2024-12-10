@@ -83,7 +83,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	instance.init("TRex.gem", dxcore);
 	// 
-	textureManager.load(dxcore, "Textures/bark09.png");
+	//textureManager.load(dxcore, "Textures/bark09.png");
 	//std::vector<mesh> meshes;
 
 	//loadTree(dxcore, meshes);
@@ -194,7 +194,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			animShader.apply(dxcore);
 			
 			instance.draw(dxcore);
-
+			
 			
 			//instance.draw(dxcore);
 			/*win.processMessages();*/
