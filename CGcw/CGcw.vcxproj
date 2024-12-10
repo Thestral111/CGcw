@@ -151,6 +151,8 @@
     <Text Include="Animation_vertexShader.txt" />
     <Text Include="newPixelShader.txt" />
     <Text Include="pixelShader.txt" />
+    <Text Include="skyPixelShader.txt" />
+    <Text Include="skyVertexShader.txt" />
     <Text Include="vertexShader.txt" />
   </ItemGroup>
   <ItemGroup>

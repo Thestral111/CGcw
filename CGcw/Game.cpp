@@ -72,6 +72,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	Skybox skybox;
 	
 	world = world.scaling(Vec3(0.01f, 0.01f, 0.01f));
+	Matrix w1;
+	w1 = Matrix::translation(Vec3(2, 0, 0));
 	GamesEngineeringBase :: Timer timer;
 	win.init(1024, 1024, "My Window");
 	dxcore.init(1024, 1024, win.hwnd, 0);
@@ -95,9 +97,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	tree.load(dxcore, "Resource/pine.gem", textureManager);
 
 	std::vector<std::string> cubemapFaces = {
-		"Textures/right.jpg",  "Textures/left.jpg",
-		"Textures/top.jpg",    "Textures/bottom.jpg",
-		"Textures/front.jpg",  "Textures/back.jpg"
+		"Standard-Cube-Map/px.png",  "Standard-Cube-Map/nx.png",
+		"Standard-Cube-Map/py.png",    "Standard-Cube-Map/ny.png",
+		"Standard-Cube-Map/pz.png",  "Standard-Cube-Map/nz.png"
 	};
 	skybox.init(dxcore, cubemapFaces);
 
@@ -159,8 +161,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 			dxcore.clear();
 			win.processMessages();
-
+			skybox.render(dxcore, camera, p);
 			
+
+			shader1.updateConstantVS("staticMeshBuffer", "W", &w1); // planeWorld
+			//shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
+			shader1.updateConstantVS("staticMeshBuffer", "VP", &vp);
+			shader1.apply(dxcore);
+			plane.draw(dxcore);
 			// planeworld is the rotation, translation and scale
 			// vp is lookat and projection
 			shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
@@ -171,8 +179,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			shader.apply(dxcore);
 			tree.draw(dxcore, textureManager);
 
-			Matrix w1;
-			w1 = Matrix::translation(Vec3(1, 0, 0));
+			
 			instance.update("roar", dt);
 			animShader.updateConstantVS("animatedMeshBuffer", "W", &w1); // planeWorld
 			animShader.updateConstantVS("animatedMeshBuffer", "VP", &vp); // StaticModel
@@ -188,11 +195,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			
 			instance.draw(dxcore);
 
-			shader1.updateConstantVS("staticMeshBuffer", "W", &w1); // planeWorld
-			//shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
-			shader1.updateConstantVS("staticMeshBuffer", "VP", &vp);
-			shader1.apply(dxcore);
-			plane.draw(dxcore);
+			
+			//instance.draw(dxcore);
 			/*win.processMessages();*/
 			dxcore.present();
 		}

@@ -4,6 +4,7 @@
 #include "Shaders.h"
 #include "Texture.h"
 #include "GEMLoader.h"
+#include "Camera.h"
 
 
 
@@ -267,9 +268,10 @@ public:
 	void init(DXCore& dxcore, const std::vector<std::string>& cubemapFaces) {
 		// Initialize the cube mesh
 		skyCube.init(dxcore);
-
+		// Scale the cube to a large size (e.g., 100 units)
+		
 		// Initialize the shader
-		skyShader.init("skyboxVertexShader.txt", "skyboxPixelShader.txt", dxcore);
+		skyShader.init("skyVertexShader.txt", "skyPixelShader.txt", dxcore);
 
 		// Load the cubemap texture
 		cubemapTexture.loadCubemap(dxcore, cubemapFaces);
@@ -287,11 +289,12 @@ public:
 		dxcore.devicecontext->OMSetDepthStencilState(depthStencilState, 0);
 
 		// Set the view matrix without translation
-		Matrix view = camera.getViewMatrix();
-		view.m[12] = view.m[13] = view.m[14] = 0; // Remove translation
+		Matrix view = camera.getLookat();
+		view.m[3] = view.m[7] = view.m[11] = 0; // Remove translation
 
 		// Pass matrices to the shader
-		Matrix vp = view * projection;
+		Matrix scaleMatrix = Matrix::scaling(Vec3(100.0f, 100.0f, 100.0f));
+		Matrix vp =  scaleMatrix * view * projection;
 		skyShader.updateConstantVS("staticMeshBuffer", "VP", &vp);
 
 		// Bind the cubemap texture
@@ -303,6 +306,7 @@ public:
 
 		// Restore the original depth state
 		depthStencilState->Release();
+		dxcore.devicecontext->OMSetDepthStencilState(NULL, 0);
 	}
 };
 

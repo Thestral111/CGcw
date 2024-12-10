@@ -82,6 +82,12 @@
     <Text Include="newPixelShader.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="skyPixelShader.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="skyVertexShader.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\TRex.gem">
