@@ -1,2 +1,5 @@
 update shader and constant buffer in model draw instead of main
 instancing
+transpose or inverse when rotate light to normal space?
+try put the changes of shader into pixel shader
+animation interact with player

@@ -2,6 +2,7 @@ cbuffer staticMeshBuffer
 {
 	float4x4 W;
 	float4x4 VP;
+	float3 lightPos;
 };
 
 struct VS_INPUT

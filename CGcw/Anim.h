@@ -2,7 +2,7 @@
 //#include <Windows.h>
 //#include "Window.h"
 //#include "Device.h"
-//#include "Shaders.h"
+#include "Shaders.h"
 //#include "Mesh.h"
 //#include "geometry.h"
 //#include "GamesEngineeringBase.h"
@@ -129,6 +129,7 @@ public:
 	float t;
 	Matrix matrices[256];
 	std::vector<mesh> meshes;
+	std::vector<std::string> textureFilenames;
 	
 	void resetAnimationTime()
 	{
@@ -161,7 +162,7 @@ public:
 		animation.calcFinalTransforms(matrices);
 	}
 
-	void init(std::string filename, DXCore& core) {
+	void init(std::string filename, DXCore& core, TextureManager& textureManager) {
 		GEMLoader::GEMModelLoader loader;
 		std::vector<GEMLoader::GEMMesh> gemmeshes;
 		GEMLoader::GEMAnimation gemanimation;
@@ -175,6 +176,8 @@ public:
 				vertices.push_back(v);
 			}
 			mesh.init(vertices, gemmeshes[i].indices, core);
+			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
+			textureManager.load(core, gemmeshes[i].material.find("diffuse").getValue());
 			meshes.push_back(mesh);
 		}
 
@@ -217,9 +220,10 @@ public:
 
 	}
 
-	void draw(DXCore& core) {
+	void draw(DXCore& core, Shader& shader, TextureManager& textureManager) {
 		for (int i = 0; i < meshes.size(); i++)
 		{
+			shader.updateShaderResource(core, "tex", textureManager.find(textureFilenames[i]));
 			meshes[i].draw(core);
 		}
 	}

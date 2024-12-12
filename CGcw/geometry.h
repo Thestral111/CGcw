@@ -217,6 +217,38 @@ public:
 	Shader shader;
 	//TextureManager* textureManager;
 
+	void computeTangents(std::vector<STATIC_VERTEX>& vertices, std::vector<unsigned int>& indices) {
+		for (size_t i = 0; i < indices.size(); i += 3) {
+			// Get triangle vertices
+			STATIC_VERTEX& v0 = vertices[indices[i]];
+			STATIC_VERTEX& v1 = vertices[indices[i + 1]];
+			STATIC_VERTEX& v2 = vertices[indices[i + 2]];
+
+			// Calculate edge vectors
+			Vec3 edge1 = v1.pos - v0.pos;
+			Vec3 edge2 = v2.pos - v0.pos;
+
+			// Calculate UV delta
+			float deltaU1 = v1.tu - v0.tu;
+			float deltaV1 = v1.tv - v0.tv;
+			float deltaU2 = v2.tu - v0.tu;
+			float deltaV2 = v2.tv - v0.tv;
+
+			float f = 1.0f / (deltaU1 * deltaV2 - deltaU2 * deltaV1);
+
+			Vec3 tangent;
+			tangent.x = f * (deltaV2 * edge1.x - deltaV1 * edge2.x);
+			tangent.y = f * (deltaV2 * edge1.y - deltaV1 * edge2.y);
+			tangent.z = f * (deltaV2 * edge1.z - deltaV1 * edge2.z);
+			tangent = tangent.normalize();
+
+			// Assign tangent to all vertices of the triangle
+			v0.tangent = tangent;
+			v1.tangent = tangent;
+			v2.tangent = tangent;
+		}
+	}
+
 	void load(DXCore& dxcore, string filename, TextureManager& textureManager) {
 
 		GEMLoader::GEMModelLoader loader;
@@ -237,6 +269,7 @@ public:
 			//textureManager.load(dxcore, "bark09.png");
 			//textureManager.load(dxcore, "pine branch.png");
 			meshes.push_back(mesh);
+			computeTangents(vertices, gemmeshes[i].indices);
 		}
 	}
 	void draw(DXCore& dxcore, TextureManager& textureManager)
@@ -249,15 +282,45 @@ public:
 	}
 };
 
-class AnimModoel {
-public:
-	mesh geometry;
-	void init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& core)
-	{
-		geometry.init(&vertices[0], sizeof(ANIMATED_VERTEX), vertices.size(), &indices[0], indices.size(), core);
-	}
-
-};
+//class AnimModel {
+//public:
+//	AnimationInstance animationInstance;           // Handles animation
+//	std::vector<ID3D11ShaderResourceView*> srvs;   // Shader resource views for textures
+//
+//	// Initialize the AnimModel
+//	void init(const std::string& modelPath, DXCore& dxcore, TextureManager& textureManager) {
+//		// Initialize the AnimationInstance
+//		animationInstance.init(modelPath, dxcore, textureManager);
+//
+//		// Load textures for each mesh using the textureManager
+//		for (size_t i = 0; i < animationInstance.meshes.size(); i++) {
+//			// Generate a texture name based on the mesh index
+//			std::string textureName = "MeshTexture" + std::to_string(i);
+//
+//			// Load texture via textureManager
+//			//textureManager.load(dxcore, textureName, "Textures/" + textureName + ".png");
+//
+//			// Retrieve the SRV for this texture
+//			//srvs.push_back(textureManager.get(textureName));
+//		}
+//	}
+//
+//	// Update animation
+//	void update(const std::string& animationName, float deltaTime) {
+//		animationInstance.update(animationName, deltaTime);
+//	}
+//
+//	// Draw the AnimModel
+//	void draw(DXCore& dxcore, Shader& shader) {
+//		for (size_t i = 0; i < animationInstance.meshes.size(); i++) {
+//			// Bind the texture for this mesh
+//			shader.updateShaderResource(dxcore, "tex", srvs[i]);
+//
+//			// Draw the animated mesh
+//			animationInstance.meshes[i].draw(dxcore);
+//		}
+//	}
+//};
 
 class Skybox {
 public:

@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include "Anim.h"
 #include "Camera.h"
+#include "Light.h"
 
 
 //class StaticModel
@@ -67,9 +68,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	Matrix v1;
 	Matrix p1;
 	TextureManager textureManager;
+	TextureManager textureManager1;
 	AnimationInstance instance;
 	Camera camera;
 	Skybox skybox;
+	Light light;
 	
 	world = world.scaling(Vec3(0.01f, 0.01f, 0.01f));
 	Matrix w1;
@@ -77,11 +80,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	GamesEngineeringBase :: Timer timer;
 	win.init(1024, 1024, "My Window");
 	dxcore.init(1024, 1024, win.hwnd, 0);
-	shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore);
-	shader1.init("3D_vertexShader.txt", "pixelShader.txt", dxcore);
-	animShader.initAnim("Animation_vertexShader.txt", "pixelShader.txt", dxcore);
+	//shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore);
+	//shader.init("normalVertexShader.txt", "normalPixelShader.txt", dxcore); //with normal and light
+	shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore); //with normal and light
+	shader1.init("3D_vertexShader.txt", "pixelShader.txt", dxcore); // skybox
+	animShader.initAnim("Animation_vertexShader.txt", "newPixelShader.txt", dxcore);
 
-	instance.init("TRex.gem", dxcore);
+	instance.init("TRex.gem", dxcore, textureManager1);
 	// 
 	//textureManager.load(dxcore, "Textures/bark09.png");
 	//std::vector<mesh> meshes;
@@ -95,6 +100,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	StaticModel tree;
 	tree.load(dxcore, "Resource/pine.gem", textureManager);
+	/*StaticModel tree;
+	tree.load(dxcore, "Resource/pine.gem", textureManager);*/
 
 	std::vector<std::string> cubemapFaces = {
 		"Standard-Cube-Map/px.png",  "Standard-Cube-Map/nx.png",
@@ -175,6 +182,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			//shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
 			shader.updateConstantVS("staticMeshBuffer", "VP", &vp); // StaticModel
 			//shader.updateConstantVS("Animated", "staticMeshBuffer", "bones", instance.matrices); //anim
+			light.position = Vec3(5.0f, 10.0f, 5.0f);
+			shader.updateConstantVS("staticMeshBuffer", "lightPos", &light.position);
+			shader.updateConstantPS("staticMeshBuffer", "lightColour", &light.color);
+			shader.updateConstantPS("staticMeshBuffer", "lightIntensity", &light.intensity);
 
 			shader.apply(dxcore);
 			tree.draw(dxcore, textureManager);
@@ -193,7 +204,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			//tree.draw(dxcore, textureManager);
 			animShader.apply(dxcore);
 			
-			instance.draw(dxcore);
+			instance.draw(dxcore, animShader, textureManager1);
 			
 			
 			//instance.draw(dxcore);
