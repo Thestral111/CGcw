@@ -52,7 +52,12 @@
 //		}
 //	}
 //};
-
+//Texture normalMapTexture;
+//
+//void loadTextures(DXCore& dxcore) {
+//	//diffuseTexture.load(dxcore, "Textures/diffuse.png");
+//	normalMapTexture.load(dxcore, "Textures/bark09_normal.png");
+//}
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
 	Window win;
@@ -80,9 +85,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	GamesEngineeringBase :: Timer timer;
 	win.init(1024, 1024, "My Window");
 	dxcore.init(1024, 1024, win.hwnd, 0);
-	//shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore);
+	shader.initWithNormal("3D_vertexShader.txt", "newPixelShader.txt", dxcore);
 	//shader.init("normalVertexShader.txt", "normalPixelShader.txt", dxcore); //with normal and light
-	shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore); //with normal and light
+	//shader.init("3D_vertexShader.txt", "newPixelShader.txt", dxcore); //with normal and light
 	shader1.init("3D_vertexShader.txt", "pixelShader.txt", dxcore); // skybox
 	animShader.initAnim("Animation_vertexShader.txt", "newPixelShader.txt", dxcore);
 
@@ -98,6 +103,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	//cube.init(dxcore);
 	Matrix x;
 
+	//loadTextures(dxcore);
 	StaticModel tree;
 	tree.load(dxcore, "Resource/pine.gem", textureManager);
 	/*StaticModel tree;
@@ -186,7 +192,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			shader.updateConstantVS("staticMeshBuffer", "lightPos", &light.position);
 			shader.updateConstantPS("staticMeshBuffer", "lightColour", &light.color);
 			shader.updateConstantPS("staticMeshBuffer", "lightIntensity", &light.intensity);
-
+			//shader.updateShaderResource(dxcore, "normalMap", normalMapTexture.srv);
 			shader.apply(dxcore);
 			tree.draw(dxcore, textureManager);
 

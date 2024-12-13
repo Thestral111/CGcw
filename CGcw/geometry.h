@@ -14,6 +14,13 @@ void getDXCore(DXCore& _core) {
 	core1 = _core;
 }
 
+Texture normalMapTexture;
+
+void loadTextures(DXCore& dxcore) {
+	//diffuseTexture.load(dxcore, "Textures/diffuse.png");
+	normalMapTexture.load(dxcore, "Textures/bark09_normal.png");
+}
+
 struct STATIC_VERTEX
 {
 	Vec3 pos;
@@ -265,11 +272,14 @@ public:
 			mesh.init(vertices, gemmeshes[i].indices, dxcore);
 			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
 			textureManager.load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
+			//textureFilenames.push_back(gemmeshes[i].material.find("normal").getValue());
+			//textureManager.load(dxcore, gemmeshes[i].material.find("normal").getValue());
 			//textureManager->load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
 			//textureManager.load(dxcore, "bark09.png");
 			//textureManager.load(dxcore, "pine branch.png");
 			meshes.push_back(mesh);
-			computeTangents(vertices, gemmeshes[i].indices);
+			//computeTangents(vertices, gemmeshes[i].indices);
+			loadTextures(dxcore);
 		}
 	}
 	void draw(DXCore& dxcore, TextureManager& textureManager)
@@ -277,6 +287,8 @@ public:
 		for (int i = 0; i < meshes.size(); i++)
 		{
 			shader.updateShaderResource(dxcore, "tex", textureManager.find(textureFilenames[i]));
+			//shader.updateShaderResource(dxcore, "normal", textureManager.find(textureFilenames[i]));
+			shader.updateShaderResource(dxcore, "normalMap", normalMapTexture.srv);
 			meshes[i].draw(dxcore);
 		}
 	}
