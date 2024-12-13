@@ -98,8 +98,13 @@ public:
     }
 
     void updateShaderResource(DXCore& core, string name,ID3D11ShaderResourceView* srv) {
-        core.devicecontext->PSSetShaderResources(textureBindPoints[name], 1, &srv);
-
+        //core.devicecontext->PSSetShaderResources(textureBindPoints[name], 1, &srv);
+        if (name == "tex") {
+            core.devicecontext->PSSetShaderResources(0, 1, &srv); // Bind to t0
+        }
+        else if (name == "normalMap") {
+            core.devicecontext->PSSetShaderResources(1, 1, &srv); // Bind to t1
+        }
     }
 
     void updateConstantVS(string constantBufferName, string variableName, void* data) {

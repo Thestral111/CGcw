@@ -10,6 +10,12 @@
 //#include "Texture.h"
 //#include "GraphicMath.h"
 
+Texture normalMapTexture1;
+
+void loadTextures1(DXCore& dxcore) {
+	//diffuseTexture.load(dxcore, "Textures/diffuse.png");
+	normalMapTexture1.load(dxcore, "Textures/T-rex_Normal_OpenGL.png");
+}
 
 struct Bone
 {
@@ -217,13 +223,14 @@ public:
 			animation.animations.insert({ name, aseq });
 		}
 
-
+		loadTextures1(core);
 	}
 
 	void draw(DXCore& core, Shader& shader, TextureManager& textureManager) {
 		for (int i = 0; i < meshes.size(); i++)
 		{
 			shader.updateShaderResource(core, "tex", textureManager.find(textureFilenames[i]));
+			shader.updateShaderResource(core, "normalMap", normalMapTexture1.srv);
 			meshes[i].draw(core);
 		}
 	}

@@ -135,6 +135,7 @@
     <ClInclude Include="Anim.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="cgmath.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="GamesEngineeringBase.h" />
     <ClInclude Include="GEMLoader.h" />

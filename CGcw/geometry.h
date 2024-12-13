@@ -286,6 +286,7 @@ public:
 	{
 		for (int i = 0; i < meshes.size(); i++)
 		{
+			//shader.updateShaderResource(dxcore, "normalMap", normalMapTexture.srv);
 			shader.updateShaderResource(dxcore, "tex", textureManager.find(textureFilenames[i]));
 			//shader.updateShaderResource(dxcore, "normal", textureManager.find(textureFilenames[i]));
 			shader.updateShaderResource(dxcore, "normalMap", normalMapTexture.srv);

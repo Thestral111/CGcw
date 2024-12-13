@@ -12,46 +12,7 @@
 #include "Light.h"
 
 
-//class StaticModel
-//{
-//public:
-//	std::vector<std::string> textureFilenames;
-//	vector<mesh> meshes;
-//	Texture texture;
-//	Shader shader;
-//	//TextureManager* textureManager;
-//
-//	void load(DXCore& dxcore, string filename, TextureManager& textureManager) {
-//
-//		GEMLoader::GEMModelLoader loader;
-//		std::vector<GEMLoader::GEMMesh> gemmeshes;
-//		loader.load(filename, gemmeshes);
-//		for (int i = 0; i < gemmeshes.size(); i++) {
-//			mesh mesh;
-//			std::vector<STATIC_VERTEX> vertices;
-//			for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
-//				STATIC_VERTEX v;
-//				memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
-//				vertices.push_back(v);
-//			}
-//			mesh.init(vertices, gemmeshes[i].indices, dxcore);
-//			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
-//			textureManager.load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
-//			//textureManager->load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
-//			//textureManager.load(dxcore, "bark09.png");
-//			//textureManager.load(dxcore, "pine branch.png");
-//			meshes.push_back(mesh);
-//		}
-//	}
-//	void draw(DXCore& dxcore, TextureManager& textureManager)
-//	{
-//		for (int i = 0; i < meshes.size(); i++)
-//		{
-//			shader.updateShaderResource(dxcore, "tex", textureManager.find(textureFilenames[i]));
-//			meshes[i].draw(dxcore);
-//		}
-//	}
-//};
+
 //Texture normalMapTexture;
 //
 //void loadTextures(DXCore& dxcore) {
@@ -82,6 +43,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	world = world.scaling(Vec3(0.01f, 0.01f, 0.01f));
 	Matrix w1;
 	w1 = Matrix::translation(Vec3(2, 0, 0));
+	Matrix w2;
+	w2 = w2.scaling(Vec3(10.f, 10.f, 10.f));
+	//w2 = w2.translation(Vec3(0, -2.0, 0));
 	GamesEngineeringBase :: Timer timer;
 	win.init(1024, 1024, "My Window");
 	dxcore.init(1024, 1024, win.hwnd, 0);
@@ -125,6 +89,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	int lastMouseX = win.mousex;
 	int lastMouseY = win.mousey;
 
+	wstring msg = L"string\n";
+	OutputDebugString(msg.c_str());
 		while (true)
 		{
 			//float t;
@@ -162,6 +128,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 				lastMouseX = currentMouseX;
 				lastMouseY = currentMouseY;
+				
+
 			}
 			else {
 				lastMouseX = win.mousex;
@@ -177,7 +145,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			skybox.render(dxcore, camera, p);
 			
 
-			shader1.updateConstantVS("staticMeshBuffer", "W", &w1); // planeWorld
+			shader1.updateConstantVS("staticMeshBuffer", "W", &w2); // planeWorld
 			//shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
 			shader1.updateConstantVS("staticMeshBuffer", "VP", &vp);
 			shader1.apply(dxcore);
@@ -188,10 +156,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			//shader.updateConstantVS("staticMeshBuffer", "W", &world); // planeWorld
 			shader.updateConstantVS("staticMeshBuffer", "VP", &vp); // StaticModel
 			//shader.updateConstantVS("Animated", "staticMeshBuffer", "bones", instance.matrices); //anim
-			light.position = Vec3(5.0f, 10.0f, 5.0f);
+			//light.position = Vec3(5.0f, 5.0f, 5.0f);
 			shader.updateConstantVS("staticMeshBuffer", "lightPos", &light.position);
 			shader.updateConstantPS("staticMeshBuffer", "lightColour", &light.color);
-			shader.updateConstantPS("staticMeshBuffer", "lightIntensity", &light.intensity);
+			//shader.updateConstantPS("staticMeshBuffer", "lightIntensity", &light.intensity);
 			//shader.updateShaderResource(dxcore, "normalMap", normalMapTexture.srv);
 			shader.apply(dxcore);
 			tree.draw(dxcore, textureManager);

@@ -3,6 +3,7 @@ cbuffer staticMeshBuffer
 	float4x4 W;
 	float4x4 VP;
 	float3 lightPos;
+	float3 lightColour;
 };
 
 struct VS_INPUT
