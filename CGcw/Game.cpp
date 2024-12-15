@@ -184,7 +184,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			// update constant buffer for the tree
 			shader.updateConstantVS("staticMeshBuffer", "W", &treeWorld); 
 			shader.updateConstantVS("staticMeshBuffer", "VP", &vp); // StaticModel
-			shader.updateConstantVS("staticMeshBuffer", "lightPos", &light.position);
+			shader.updateConstantVS("staticMeshBuffer", "lightDir", &light.direction);
 			shader.updateConstantPS("staticMeshBuffer", "lightColour", &light.color);
 			shader.apply(dxcore);
 			//draw the tree
