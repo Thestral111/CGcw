@@ -2,6 +2,7 @@
 // Camera.h
 #pragma once
 #include "cgmath.h"
+#include "Collision.h"
 
 class Camera {
 public:
@@ -10,23 +11,13 @@ public:
     Vec3 up;
     float yaw, pitch;
     float moveSpeed, rotateSpeed;
+    AABB box{ (position - Vec3(0.5f, 1.0f, 0.5f)), (position + Vec3(0.5f, 0.0f, 0.5f)) };
 
     Camera(Vec3 pos = Vec3(0, 2, 5), Vec3 tar = Vec3(0, 0, 0), Vec3 u = Vec3(0, 1, 0))
         : position(pos), target(tar), up(u), yaw(0), pitch(0), moveSpeed(5.0f), rotateSpeed(0.001f) {}
 
-    Matrix getViewMatrix() {
-        Vec3 direction = target - position;
-        direction = direction.normalize();
-        Vec3 right = up.Cross(direction).normalize();
-        Vec3 adjustedUp = direction.Cross(right);
-        Matrix view;
-        view.m[0] = right.x; view.m[4] = right.y; view.m[8] = right.z; view.m[12] = -position.Dot(right);
-        view.m[1] = adjustedUp.x; view.m[5] = adjustedUp.y; view.m[9] = adjustedUp.z; view.m[13] = -position.Dot(adjustedUp);
-        view.m[2] = direction.x; view.m[6] = direction.y; view.m[10] = direction.z; view.m[14] = -position.Dot(direction);
-        view.m[3] = 0; view.m[7] = 0; view.m[11] = 0; view.m[15] = 1;
-        return view;
-    }
-
+    
+    // get the lookat matrix in math lib
     Matrix getLookat() {
         Matrix v;
         Matrix v1 = v.lookAt(position, target, up);
@@ -42,9 +33,11 @@ public:
         yaw += xOffset * rotateSpeed;
         pitch += yOffset * rotateSpeed;
 
+        // limit the rotate angle
         if (pitch > 89.0f) pitch = 89.0f;
         if (pitch < -89.0f) pitch = -89.0f;
 
+        // copute the direction into Vec3 and compute target
         Vec3 direction;
         direction.x = cos(yaw) * cos(pitch);
         direction.y = sin(pitch);
@@ -52,6 +45,7 @@ public:
         target = position + direction.normalize();
     }
 
+    // get direction of camera
     Vec3 getForwardDirection() const {
         return Vec3(
             cos(yaw) * cos(pitch),
@@ -66,6 +60,11 @@ public:
             0,
             sin(yaw - M_PI_2)
         ).normalize();
+    }
+
+    // bounding box moves with the camera
+    void updateBoundingBox() {
+        box.updatePos((position - Vec3(0.5f, 1.0f, 0.5f)), (position + Vec3(0.5f, 0.0f, 0.5f)));
     }
 
 };

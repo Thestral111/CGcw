@@ -1,0 +1,27 @@
+// this is for defer shading but not actually in use as defer shading is not finished
+
+Texture2D tex : register(t0);
+SamplerState samplerLinear : register(s0);
+
+struct PS_INPUT {
+	float4 Pos : SV_POSITION;
+	float3 Normal : NORMAL;
+	float3 Tangent : TANGENT;
+	float2 TexCoords : TEXCOORD;
+};
+
+struct GBUFFER_OUTPUT {
+    float4 WorldPos : SV_Target0;
+    float4 Normal : SV_Target1;
+    float4 Albedo : SV_Target2;
+};
+
+GBUFFER_OUTPUT PS(PS_INPUT input) {
+    GBUFFER_OUTPUT output;
+
+    output.Pos = float4(input.Pos, 1.0);
+    output.Normal = float4(normalize(input.Normal), 1.0);
+    output.Albedo = float4(tex.Sample(samplerLinear, input.TexCoords).rgb, 1.0);
+
+    return output;
+}

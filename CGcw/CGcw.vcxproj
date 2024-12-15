@@ -151,6 +151,7 @@
   <ItemGroup>
     <Text Include="3D_vertexShader.txt" />
     <Text Include="Animation_vertexShader.txt" />
+    <Text Include="deferPixelShader.txt" />
     <Text Include="newPixelShader.txt" />
     <Text Include="normalPixelShader.txt" />
     <Text Include="normalVertexShader.txt" />

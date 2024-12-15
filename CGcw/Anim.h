@@ -136,6 +136,7 @@ public:
 	Matrix matrices[256];
 	std::vector<mesh> meshes;
 	std::vector<std::string> textureFilenames;
+	AABB box;
 	
 	void resetAnimationTime()
 	{
@@ -172,6 +173,7 @@ public:
 		GEMLoader::GEMModelLoader loader;
 		std::vector<GEMLoader::GEMMesh> gemmeshes;
 		GEMLoader::GEMAnimation gemanimation;
+		std::vector<Vec3> allVertices;
 		loader.load(filename, gemmeshes, gemanimation);
 		for (int i = 0; i < gemmeshes.size(); i++) {
 			mesh mesh;
@@ -180,12 +182,16 @@ public:
 				ANIMATED_VERTEX v;
 				memcpy(&v, &gemmeshes[i].verticesAnimated[j], sizeof(ANIMATED_VERTEX));
 				vertices.push_back(v);
+				// get all vertices to compute bounding box
+				allVertices.push_back(v.pos);
 			}
 			mesh.init(vertices, gemmeshes[i].indices, core);
+			// load texture
 			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
 			textureManager.load(core, gemmeshes[i].material.find("diffuse").getValue());
 			meshes.push_back(mesh);
 		}
+		box = box.computeAABB(allVertices);
 
 		// bones
 		for (int i = 0; i < gemanimation.bones.size(); i++)
@@ -223,6 +229,7 @@ public:
 			animation.animations.insert({ name, aseq });
 		}
 
+		// load normal map
 		loadTextures1(core);
 	}
 

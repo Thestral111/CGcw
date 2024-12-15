@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "GEMLoader.h"
 #include "Camera.h"
+#include "Collision.h"
 
 
 
@@ -15,7 +16,7 @@ void getDXCore(DXCore& _core) {
 }
 
 Texture normalMapTexture;
-
+// load normal map
 void loadTextures(DXCore& dxcore) {
 	//diffuseTexture.load(dxcore, "Textures/diffuse.png");
 	normalMapTexture.load(dxcore, "Textures/bark09_normal.png");
@@ -214,7 +215,7 @@ public:
 
 };
 
-
+// static model e.g. tree
 class StaticModel
 {
 public:
@@ -222,6 +223,7 @@ public:
 	vector<mesh> meshes;
 	Texture texture;
 	Shader shader;
+	AABB boundingBox;
 	//TextureManager* textureManager;
 
 	void computeTangents(std::vector<STATIC_VERTEX>& vertices, std::vector<unsigned int>& indices) {
@@ -261,6 +263,7 @@ public:
 		GEMLoader::GEMModelLoader loader;
 		std::vector<GEMLoader::GEMMesh> gemmeshes;
 		loader.load(filename, gemmeshes);
+		std::vector<Vec3> allVertices;
 		for (int i = 0; i < gemmeshes.size(); i++) {
 			mesh mesh;
 			std::vector<STATIC_VERTEX> vertices;
@@ -268,19 +271,27 @@ public:
 				STATIC_VERTEX v;
 				memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
 				vertices.push_back(v);
+				//get all vertices to compute bounding box
+				allVertices.push_back(v.pos);
 			}
+			computeTangents(vertices, gemmeshes[i].indices);
 			mesh.init(vertices, gemmeshes[i].indices, dxcore);
 			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
 			textureManager.load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
-			//textureFilenames.push_back(gemmeshes[i].material.find("normal").getValue());
-			//textureManager.load(dxcore, gemmeshes[i].material.find("normal").getValue());
-			//textureManager->load(dxcore, gemmeshes[i].material.find("diffuse").getValue());
-			//textureManager.load(dxcore, "bark09.png");
-			//textureManager.load(dxcore, "pine branch.png");
+			
 			meshes.push_back(mesh);
-			//computeTangents(vertices, gemmeshes[i].indices);
+			
+			// load normal map
 			loadTextures(dxcore);
+			
 		}
+		boundingBox = boundingBox.computeAABB(allVertices);
+		
+		OutputDebugString(to_wstring(boundingBox.min.x).c_str());
+		OutputDebugString(to_wstring(boundingBox.min.y).c_str());
+		OutputDebugString(to_wstring(boundingBox.min.z).c_str());
+		wstring str = L"\n";
+		OutputDebugString(str.c_str());
 	}
 	void draw(DXCore& dxcore, TextureManager& textureManager)
 	{
@@ -295,45 +306,7 @@ public:
 	}
 };
 
-//class AnimModel {
-//public:
-//	AnimationInstance animationInstance;           // Handles animation
-//	std::vector<ID3D11ShaderResourceView*> srvs;   // Shader resource views for textures
-//
-//	// Initialize the AnimModel
-//	void init(const std::string& modelPath, DXCore& dxcore, TextureManager& textureManager) {
-//		// Initialize the AnimationInstance
-//		animationInstance.init(modelPath, dxcore, textureManager);
-//
-//		// Load textures for each mesh using the textureManager
-//		for (size_t i = 0; i < animationInstance.meshes.size(); i++) {
-//			// Generate a texture name based on the mesh index
-//			std::string textureName = "MeshTexture" + std::to_string(i);
-//
-//			// Load texture via textureManager
-//			//textureManager.load(dxcore, textureName, "Textures/" + textureName + ".png");
-//
-//			// Retrieve the SRV for this texture
-//			//srvs.push_back(textureManager.get(textureName));
-//		}
-//	}
-//
-//	// Update animation
-//	void update(const std::string& animationName, float deltaTime) {
-//		animationInstance.update(animationName, deltaTime);
-//	}
-//
-//	// Draw the AnimModel
-//	void draw(DXCore& dxcore, Shader& shader) {
-//		for (size_t i = 0; i < animationInstance.meshes.size(); i++) {
-//			// Bind the texture for this mesh
-//			shader.updateShaderResource(dxcore, "tex", srvs[i]);
-//
-//			// Draw the animated mesh
-//			animationInstance.meshes[i].draw(dxcore);
-//		}
-//	}
-//};
+
 
 class Skybox {
 public:
@@ -364,12 +337,14 @@ public:
 		dxcore.device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 		dxcore.devicecontext->OMSetDepthStencilState(depthStencilState, 0);
 
-		// Set the view matrix without translation
+		// Set the view matrix without translation so you never reach the end of the skybox
 		Matrix view = camera.getLookat();
-		view.m[3] = view.m[7] = view.m[11] = 0; // Remove translation
+		view.m[3] = 0;
+		view.m[7] = 0;
+		view.m[11] = 0;
 
 		// Pass matrices to the shader
-		Matrix scaleMatrix = Matrix::scaling(Vec3(100.0f, 100.0f, 100.0f));
+		Matrix scaleMatrix = Matrix::scaling(Vec3(10.0f, 10.0f, 10.0f));
 		Matrix vp =  scaleMatrix * view * projection;
 		skyShader.updateConstantVS("staticMeshBuffer", "VP", &vp);
 
