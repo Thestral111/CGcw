@@ -78,10 +78,12 @@ public:
         }
 
         // Load the images for each face
-        int width = 0, height = 0, channels = 0;
+        int width = 0;
+        int height = 0;
+        int channels = 0;
         std::vector<unsigned char*> faceData;
         for (const auto& face : faces) {
-            unsigned char* data = stbi_load(face.c_str(), &width, &height, &channels, STBI_rgb_alpha); // Load as RGBA
+            unsigned char* data = stbi_load(face.c_str(), &width, &height, &channels, STBI_rgb_alpha); 
             if (!data) {
                 throw std::runtime_error("Failed to load cubemap face: " + face);
             }
@@ -94,7 +96,7 @@ public:
         texDesc.Height = height;
         texDesc.MipLevels = 1;
         texDesc.ArraySize = 6; // 6 faces for the cubemap
-        texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // Ensure format is compatible with the image data
+        texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; 
         texDesc.Usage = D3D11_USAGE_DEFAULT;
         texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         texDesc.CPUAccessFlags = 0;
@@ -170,7 +172,7 @@ public:
 
     void apply(DXCore& dxcore) {
         dxcore.devicecontext->PSSetShaderResources(0, 1, &srv);
-        // call the setshader in shader.h
+        
     }
 
     void free() {
