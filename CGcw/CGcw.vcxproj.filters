@@ -94,12 +94,6 @@
     <Text Include="skyVertexShader.txt">
       <Filter>Source Files</Filter>
     </Text>
-    <Text Include="normalVertexShader.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-    <Text Include="normalPixelShader.txt">
-      <Filter>Source Files</Filter>
-    </Text>
     <Text Include="deferPixelShader.txt">
       <Filter>Source Files</Filter>
     </Text>
